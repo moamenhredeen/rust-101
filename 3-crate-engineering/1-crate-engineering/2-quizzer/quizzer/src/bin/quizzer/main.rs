@@ -1,15 +1,19 @@
-use std::{
-    fs::File,
-    io::{self, BufRead, Write},
-};
+use std::{fs::File, io};
 
+use add::add;
 use anyhow::Ok;
-use quizzer::{Answer, Question, Quiz};
+use clap::{Parser, Subcommand};
 
-use clap::{command, Parser, Subcommand};
+mod add;
+mod play;
 
 #[derive(Parser)]
-#[command(name = "quizzer", version = "1.0", about = "quiz cli")]
+#[command(
+    name = "quizzer",
+    version = "1.0",
+    about = "quiz cli",
+    arg_required_else_help = true
+)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -18,88 +22,33 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     #[command(about = "start playing")]
-    Player,
+    Play,
 
     #[command(about = "create questions")]
-    Editor,
+    Add {
+        #[arg(short, long)]
+        file: String,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
+    let mut stdout = io::stdout().lock();
+    let mut stdin = io::stdin().lock();
+
     let cli = Cli::parse();
-    match &cli.command {
-        Some(Commands::Editor) => {
-            let mut quiz = Quiz::new();
-
-            let mut stdin = io::stdin().lock();
-            let mut stdout = io::stdout().lock();
-            let mut buf = String::new();
-
-            loop {
-                // read question
-                write!(&mut stdout, "Enter a new question: ")?;
-                stdout.flush()?;
-                _ = stdin.read_line(&mut buf)?;
-                if buf.trim().is_empty() {
-                    break;
-                }
-
-                trim_newline(&mut buf);
-                let mut q = Question::new(buf.trim().to_string());
-
-                loop {
-                    // read answer
-                    buf.clear();
-                    write!(&mut stdout, "Enter Answer: ")?;
-                    stdout.flush()?;
-                    _ = stdin.read_line(&mut buf)?;
-                    // if the user did not enter anything exit
-                    if buf.trim().is_empty() {
-                        break;
-                    }
-
-                    trim_newline(&mut buf);
-                    let mut ans = Answer::from_string(buf.trim().to_string());
-
-                    // read if the answer a correct answer
-                    buf.clear();
-                    write!(&mut stdout, "was this a correct answer [yes/NO]: ")?;
-                    stdout.flush()?;
-                    _ = stdin.read_line(&mut buf)?;
-
-                    trim_newline(&mut buf);
-                    if buf.trim().to_lowercase().eq("yes") {
-                        ans.correct(true);
-                    }
-
-                    q.add_answer(ans);
-                }
-
-                // save question
-                quiz.add_question(q)?;
-
-                let quiz_json = serde_json::to_string(&quiz)?;
-                let mut output_file = File::create("./quiz.json")?;
-                write!(&mut output_file, "{}", quiz_json)?;
-            }
-
-            println!("{:?}", quiz);
+    _ = match &cli.command {
+        Some(Commands::Add { file }) => {
+            let file = File::create(file)?;
+            println!("file: {:?}", file);
+            _ = add(&mut stdin, &mut stdout);
+            Ok(())
+        } //start_editor()
+        Some(Commands::Play) => {
+            _ = play::play();
             Ok(())
         }
-        Some(Commands::Player) => {
-            println!("player");
-            Ok(())
-        }
-        None => {
-            unreachable!()
-        }
-    }
-}
+        _ => Ok(()),
+    };
 
-fn trim_newline(s: &mut String) {
-    if s.ends_with('\n') || s.ends_with('\r') {
-        s.pop();
-        if s.ends_with('\r') {
-            s.pop();
-        }
-    }
+    Ok(())
 }
