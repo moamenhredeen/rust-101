@@ -1,11 +1,17 @@
-use std::{fs::File, io};
+use std::{
+    fs::File,
+    io::{self, BufReader},
+};
 
 use add::add;
 use anyhow::Ok;
 use clap::{Parser, Subcommand};
 
 mod add;
+mod fake_io_wrapper;
+mod io_wrapper;
 mod play;
+mod real_io_wrapper;
 
 #[derive(Parser)]
 #[command(
@@ -15,6 +21,9 @@ mod play;
     arg_required_else_help = true
 )]
 struct Cli {
+    #[arg(short, long)]
+    file: String,
+
     #[command(subcommand)]
     command: Option<Commands>,
 }
@@ -25,10 +34,7 @@ enum Commands {
     Play,
 
     #[command(about = "create questions")]
-    Add {
-        #[arg(short, long)]
-        file: String,
-    },
+    Add,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -36,15 +42,16 @@ fn main() -> anyhow::Result<()> {
     let mut stdin = io::stdin().lock();
 
     let cli = Cli::parse();
+
     _ = match &cli.command {
-        Some(Commands::Add { file }) => {
-            let file = File::create(file)?;
-            println!("file: {:?}", file);
-            _ = add(&mut stdin, &mut stdout);
+        Some(Commands::Add) => {
+            let mut file = File::create(cli.file)?;
+            add(&mut file, &mut stdin, &mut stdout)?;
             Ok(())
         } //start_editor()
         Some(Commands::Play) => {
-            _ = play::play();
+            let mut file_reader = BufReader::new(File::open(cli.file)?);
+            _ = play::play(&mut file_reader, &mut stdin, &mut stdout);
             Ok(())
         }
         _ => Ok(()),

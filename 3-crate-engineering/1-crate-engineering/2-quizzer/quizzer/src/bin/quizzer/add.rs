@@ -1,3 +1,4 @@
+use std::fs::File;
 use std::io;
 use std::io::BufRead;
 use std::io::Write;
@@ -6,11 +7,12 @@ use quizzer::question::Question;
 
 /// start the editor
 #[allow(unused)]
-pub fn add<R, W>(reader: &mut R, writer: &mut W) -> anyhow::Result<()>
+pub fn add<R, W>(file: &mut File, reader: &mut R, writer: &mut W) -> anyhow::Result<()>
 where
     R: BufRead,
     W: Write,
 {
+    let mut question_list = Vec::new();
     let mut lines = reader.lines();
 
     let mut count = 0;
@@ -61,6 +63,8 @@ where
         };
         count += 1;
 
+        question_list.push(question);
+
         writeln!(writer, "Question added successfully.")?;
         writer.flush()?;
         writeln!(writer, "Total questions added {}.", count)?;
@@ -71,6 +75,8 @@ where
 
         if let Some(Ok(yn)) = lines.next() {
             if yn.trim().to_lowercase() == "n" {
+                let stringified = serde_json::to_string(&question_list)?;
+                file.write_all(stringified.as_bytes());
                 break;
             }
         }
