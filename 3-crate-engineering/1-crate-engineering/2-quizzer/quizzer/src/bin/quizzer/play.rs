@@ -2,7 +2,16 @@ use std::io::{BufRead, Write};
 
 use quizzer::question::Question;
 
-/// start the game
+/// play the quiz
+/// the play function takes a file, a reader and a writer
+/// it reads the questions from the file and prints them to the writer
+/// it then asks the user to choose the right answer
+/// it returns an error if the user enters an invalid answer
+/// # parameters
+/// * `file` - the file containing the questions
+/// * `reader` - the reader used to read the user input
+/// * `writer` - the writer used to write the output
+#[allow(unused)]
 pub fn play<F, R, W>(file: &mut F, reader: &mut R, writer: &mut W) -> anyhow::Result<()>
 where
     F: BufRead,
@@ -40,4 +49,13 @@ where
         writeln!(writer, "{}", res)?;
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+
+    #[test]
+    fn dummy_test() {
+        assert!(true)
+    }
 }

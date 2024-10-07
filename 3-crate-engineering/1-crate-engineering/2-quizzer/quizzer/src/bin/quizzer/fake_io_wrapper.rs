@@ -1,10 +1,10 @@
-use std::io::{BufRead, BufReader, Cursor, Lines, Read, Write};
+use std::io::{BufRead, Cursor, Lines, Read, Write};
 
 use quizzer::question::Question;
 
 use crate::io_wrapper::IOWrapper;
 
-/// fake io wrapper used for unit testing
+/// FakeIOWrapper is a fake implementation of the IOWrapper trait
 #[allow(unused)]
 pub struct FakeIOWrapper {
     reader: Lines<Cursor<String>>,

@@ -1,3 +1,7 @@
+//! # add
+//! add a question to a quiz
+//! by asking the users couples of questions
+
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
@@ -6,6 +10,10 @@ use std::io::Write;
 use quizzer::question::Question;
 
 /// start the editor
+/// # params
+/// `file` - file to write and read from
+/// `reader` - reader to read from when reading the user input
+/// `writer` - writer to write to when asking the user
 #[allow(unused)]
 pub fn add<R, W>(file: &mut File, reader: &mut R, writer: &mut W) -> anyhow::Result<()>
 where
@@ -87,7 +95,6 @@ where
 
 #[cfg(test)]
 mod test {
-    use io::Read;
 
     use super::*;
     use std::io::Cursor;
@@ -170,9 +177,20 @@ mod test {
         );
     }
 
+    /// .
+    /// aösldkf jasödlkf asödlkf
+    /// asdölf
+    /// asöldkf
+    /// aösdlk
+    /// faöskdlföalk
+    ///
+    /// # Panics
+    ///
+    ///adsöflk asdölfka jsdöflkj
+    /// Panics if .
     #[test]
     fn create_multiple_questions_with_4_answers() {
-        let mut reader_buf = String::from(
+        let mut reader_buf: String = String::from(
             "\
             how old are you?\n\
             first answer\n\
@@ -220,5 +238,10 @@ mod test {
             Continue ? [Y/n]:\
             "
         );
+    }
+
+    #[test]
+    fn test_add() {
+        assert_eq!(2 + 2, 4);
     }
 }

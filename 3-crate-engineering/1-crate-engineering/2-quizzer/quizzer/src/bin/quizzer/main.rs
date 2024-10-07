@@ -30,10 +30,12 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Play Command
     #[command(about = "start playing")]
     Play,
 
-    #[command(about = "create questions")]
+    /// Add Command
+    #[command(about = "add a new question to a quiz")]
     Add,
 }
 
@@ -43,9 +45,9 @@ fn main() -> anyhow::Result<()> {
 
     let cli = Cli::parse();
 
-    _ = match &cli.command {
+    match &cli.command {
         Some(Commands::Add) => {
-            let mut file = File::create(cli.file)?;
+            let mut file = File::create(&cli.file)?;
             add(&mut file, &mut stdin, &mut stdout)?;
             Ok(())
         } //start_editor()
@@ -55,7 +57,5 @@ fn main() -> anyhow::Result<()> {
             Ok(())
         }
         _ => Ok(()),
-    };
-
-    Ok(())
+    }
 }

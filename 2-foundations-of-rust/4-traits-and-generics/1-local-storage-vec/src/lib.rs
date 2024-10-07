@@ -21,7 +21,6 @@ where
         }
     }
 
-
     pub fn len(&self) -> usize {
         match self {
             Self::Stack { len, .. } => *len,
@@ -114,7 +113,7 @@ where
     pub fn iter(&self) -> LocalStorageVecBorrowedIter<T, N> {
         LocalStorageVecBorrowedIter {
             vec: self,
-            counter: 0
+            counter: 0,
         }
     }
 }
@@ -163,7 +162,6 @@ where
             Self::Heap(Vec::from(array))
         }
     }
-
 }
 
 impl<T, const N: usize> AsRef<[T]> for LocalStorageVec<T, N> {
@@ -230,7 +228,6 @@ where
     }
 }
 
-
 /// represent the inner state of vec iterator
 pub struct LocalStorageVecBorrowedIter<'a, T, const N: usize>
 where
@@ -260,13 +257,11 @@ where
     }
 }
 
-
 trait LocalStorageVecIndex {}
 impl LocalStorageVecIndex for usize {}
 impl LocalStorageVecIndex for RangeFrom<usize> {}
 impl LocalStorageVecIndex for RangeTo<usize> {}
 impl LocalStorageVecIndex for Range<usize> {}
-
 
 impl<I, T, const N: usize> Index<I> for LocalStorageVec<T, N>
 where
@@ -279,7 +274,6 @@ where
         &self.as_ref()[index]
     }
 }
-
 
 // impl<T, const N: usize> Index<usize> for LocalStorageVec<T, N>
 // where
@@ -317,7 +311,6 @@ where
 //     }
 // }
 
-
 // impl<T, const N: usize> Index<RangeFrom<usize>> for LocalStorageVec<T, N>
 // where
 //     T: Copy + Default,
@@ -331,8 +324,6 @@ where
 //         }
 //     }
 // }
-
-
 
 // impl<T, const N: usize> Index<Range<usize>> for LocalStorageVec<T, N>
 // where
@@ -352,7 +343,6 @@ where
 //         }
 //     }
 // }
-
 
 #[cfg(test)]
 mod test {
@@ -546,7 +536,7 @@ mod test {
         for item in &mut iter {
             assert_eq!(item, 0);
         }
-        assert_eq!( iter.next(), None);
+        assert_eq!(iter.next(), None);
     }
 
     // Uncomment me for part F
@@ -562,9 +552,7 @@ mod test {
     // Uncomment me for part H
     #[test]
     fn it_borrowing_iters() {
-        let vec: LocalStorageVec<u32, 10> = LocalStorageVec::from([
-            1, 2, 3, 4
-        ]);
+        let vec: LocalStorageVec<u32, 10> = LocalStorageVec::from([1, 2, 3, 4]);
 
         let iter = vec.iter();
         for _ in iter {}
