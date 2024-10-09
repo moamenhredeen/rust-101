@@ -22,10 +22,14 @@ impl<T: Copy> MyCell<T> {
     }
 
     fn get(&self) -> T {
+        // SAFETY: because the value of type copy, no one gets a reference to the value,
+        // and therefore it is safe
         unsafe { *self.value.get() }
     }
 
     fn set(&self, value: T)  {
+        // SAFETY: we know, that it is not possible to mutate MyCell value from multiple threads,
+        // because MyCell implement !Sync.
         unsafe { *self.value.get() = value }
     }
 }
@@ -56,7 +60,7 @@ mod test {
         // important note: to be able to mutable reference to a value between multiple threads
         // you have to implement `!Sync` trait
         // but UnsafeCell already implement !Sync `impl<T: ?Sized> !Sync for UnsafeCell<T> {}`
-        // our cell implemetation inherit this property and therefore also implement `!Sync`
+        // our cell implementation inherit this property and therefore also implement `!Sync`
         //
         // note: if UnsafeCell did not implement `!Sync` we had to implement it ourself: 
         // first method (kind of workaround): add a member to the struct that implement `!Sync`
@@ -72,12 +76,24 @@ mod test {
         // thread::spawn(|| {
         //     b.set(20);
         // });
-        
-        // could not setup multi-threaded test 😅
-        // i need to understand how `Arc` works to be able to share 
+
+        // could not set up multithreaded test 😅
+        // I need to understand how `Arc` works to be able to share
         // a reference between threads in a safe way
         // i also have to understand `Sync` and `Send` traits, which pretty important
         // for multi-threading in rust
     }
 
+
+
+    #[test]
+    fn create_cell_and_and_mutate_it_using_multiple_shared_references() {
+        let cell = MyCell::new(10);
+        let shared_ref_1 = &cell;
+        let shared_ref_2 = &cell;
+
+        shared_ref_1.set(2);
+        shared_ref_2.set(3);
+        assert_eq!(cell.get(), 3)
+    }
 }
